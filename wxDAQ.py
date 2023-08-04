@@ -1,15 +1,33 @@
+# wxDAQ.py - NI cDAQ Console using wxPython
+#
+# Initially, I made wxDAQ.py just for fun, However, I later improved it to handle
+# situations where users make mistakes or encounter hardware problems.
+# I'm amazed by the high productivity that Python offer,
+# even though it might not be the best choice for core programming tasks.
+#
+# Application Architecture
+# - GUI Part: The GUI layer is developed using the wxPython library, providing a user interface.
+# - Data Acquisition Part: The nidaqmx library is utilized to communicate with and control the NI DAQ devices.
+# - Data Visualization Part: The matplotlib library is integrated into the GUI for real-time visualization of acquired data.
+# - Control Logic Part: This layer manages user interactions, data acquisition threads, and data visualization updates.
+#
+# Thread Management
+# - Analog Data Collection: A separate thread collects analog data from specified channels using the nidaqmx library.
+# - Digital Data Collection: Another thread collects digital data from the specified channel using the nidaqmx library.
 
-import time
-import threading
-import wx
-import nidaqmx.system
-from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
+import time  # Standard libraries
+import threading  # Standard libraries
+import wx  # GUI libraries
+import nidaqmx.system  # Data acquisition library
+
+# Data visualization libraries
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_wxagg import (
+    FigureCanvasWxAgg as FigureCanvas,
     NavigationToolbar2WxAgg as NavigationToolbar,
 )
 import matplotlib.animation as animation
-import numpy as np
+
 
 class DAQConsoleFrame(wx.Frame):
     def __init__(self, parent, title):
@@ -18,12 +36,10 @@ class DAQConsoleFrame(wx.Frame):
         # Initialize data storage for analog and digital samples
         self.analog_sample_timestamps = []
         self.analog_samples = [[] for _ in range(4)]
-
         self.digital_sample_timestamps = []
         self.digital_samples = []
 
         self.setup_ui()
-
         self.Bind(wx.EVT_CLOSE, self.on_close)
 
     def setup_ui(self):
@@ -37,12 +53,8 @@ class DAQConsoleFrame(wx.Frame):
         if True:
             # Create a figure and canvas for data visualization
             self.figure = Figure()
-            self.axes1 = self.figure.add_subplot(
-                2, 1, 1
-            )  # 1 row, 2 columns, subplot position 1
-            self.axes2 = self.figure.add_subplot(
-                2, 1, 2
-            )  # 1 row, 2 columns, subplot position 2
+            self.axes1 = self.figure.add_subplot(2, 1, 1)
+            self.axes2 = self.figure.add_subplot(2, 1, 2)
             self.canvas = FigureCanvas(panel, -1, self.figure)
             self.toolbar = NavigationToolbar(self.canvas)
 
@@ -283,7 +295,8 @@ class DAQConsoleFrame(wx.Frame):
 
             self.ani.event_source.start()
         else:
-            self.ani.event_source.stop()  # Run this code to make sure it ends smoothly and gracefully.
+            # Run this code to make sure it ends smoothly and gracefully.
+            self.ani.event_source.stop()
             time.sleep(0.1)  # Wait for the thread's exit
 
             self.statusbar.SetBackgroundColour(self.statusbar_default_background_color)
@@ -301,26 +314,17 @@ class DAQConsoleFrame(wx.Frame):
                 try:
                     the_task.ai_channels.add_ai_voltage_chan(text_ctrl.GetValue())
                 except nidaqmx.DaqError as e:
-                    self.add_ai_voltage_chan_failed = (
-                        True  # Flag should be set if there is a failure at least once.
-                    )
+                    # Set the flag if there is a failure at least once.
+                    self.add_ai_voltage_chan_failed = True
                     self.statusbar.SetBackgroundColour(wx.Colour(255, 255, 150))
                     self.statusbar.SetStatusText(
                         text_ctrl.GetValue() + " not available.", 0
                     )
 
-            add_ai_voltage_chan(
-                task, self.axes1_chan1_text
-            )  # task.ai_channels.add_ai_voltage_chan(self.axes1_chan1_text.GetValue())
-            add_ai_voltage_chan(
-                task, self.axes1_chan2_text
-            )  # task.ai_channels.add_ai_voltage_chan(self.axes1_chan2_text.GetValue())
-            add_ai_voltage_chan(
-                task, self.axes1_chan3_text
-            )  # task.ai_channels.add_ai_voltage_chan(self.axes1_chan3_text.GetValue())
-            add_ai_voltage_chan(
-                task, self.axes1_chan4_text
-            )  # task.ai_channels.add_ai_voltage_chan(self.axes1_chan4_text.GetValue())
+            add_ai_voltage_chan(task, self.axes1_chan1_text)
+            add_ai_voltage_chan(task, self.axes1_chan2_text)
+            add_ai_voltage_chan(task, self.axes1_chan3_text)
+            add_ai_voltage_chan(task, self.axes1_chan4_text)
 
             if self.add_ai_voltage_chan_failed:
                 return None
@@ -331,26 +335,26 @@ class DAQConsoleFrame(wx.Frame):
             [self.analog_samples[i].clear() for i in range(4)]
 
             while self.run_stop_toggle_button.GetValue():
-                data = (
-                    task.read()
-                )  # Read before timestamp update to simplify synchronization with update_plot()
+                # Read before timestamp update to simplify synchronization with update_plot()
+                data = task.read()
                 for i in range(4):
                     self.analog_samples[i].append(data[i])
                     self.analog_samples[i] = self.analog_samples[i][
                         -self.sample_depth :
                     ]
 
+                # with msec precision
                 self.analog_sample_timestamps.append(
                     round(time.time() * 1000) - self.start_timestamp
-                )  # with msec precision
+                )
                 self.analog_sample_timestamps = self.analog_sample_timestamps[
                     -self.sample_depth :
                 ]
 
                 # self.update_plot()
-                self.gauge.SetValue(
-                    int(data[0]) + 10
-                )  # // No need to worry about being out of range
+
+                # // No need to worry about being out of range
+                self.gauge.SetValue(int(data[0]) + 10)
 
                 time.sleep(0.01)
 
@@ -374,15 +378,15 @@ class DAQConsoleFrame(wx.Frame):
             self.digital_samples.clear()
 
             while self.run_stop_toggle_button.GetValue():
-                data = (
-                    task.read()
-                )  # Read before timestamp update to simplify synchronization with update_plot()
+                # Read before timestamp update to simplify synchronization with update_plot()
+                data = task.read()
                 self.digital_samples.append(data)
                 self.digital_samples = self.digital_samples[-self.sample_depth :]
 
+                # with msec precision
                 self.digital_sample_timestamps.append(
                     round(time.time() * 1000) - self.start_timestamp
-                )  # with msec precision
+                )
                 self.digital_sample_timestamps = self.digital_sample_timestamps[
                     -self.sample_depth :
                 ]
@@ -417,10 +421,13 @@ class DAQConsoleFrame(wx.Frame):
             task.stop()
 
     def on_close(self, event):
-        self.ani.event_source.stop()  # Run this code to make sure it ends smoothly and gracefully.
+        # Run this code to make sure it ends smoothly and gracefully.
+        self.ani.event_source.stop()
         time.sleep(0.1)
+
         self.Destroy()
         time.sleep(0.1)
+
         wx.Exit()  # We really need to force exit here
 
 
@@ -428,4 +435,3 @@ if __name__ == "__main__":
     app = wx.App(False)
     frame = DAQConsoleFrame(None, "wxDAQ - NI cDAQ Console using wxPython")
     app.MainLoop()
-
