@@ -3,7 +3,7 @@ NI cDAQ Console using wxPython
 
 ![wxDAQ Screen](./wxDAQ.png)
 
-Initially, I made `wxDAQ.py` just for fun, However, I later improved it to handle
+Initially, I created wxDAQ.py just to become familiar with NI cDAQ. I later improved it to handle
 situations where users make mistakes or encounter hardware problems.
 I'm amazed by the high productivity that Python offer,
 even though it might not be the best choice for core programming tasks.
