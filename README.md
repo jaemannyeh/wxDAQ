@@ -1,5 +1,5 @@
 # wxDAQ
-NI cDAQ Console using wxPython
+NI cDAQ Console using `wxPython`
 
 ![wxDAQ Screen](./wxDAQ.png)
 
@@ -15,5 +15,5 @@ Application Architecture:
  - Control Logic Part: This layer manages user interactions, data acquisition threads, and data visualization updates.
 
 Thread Management:
- - Analog Data Collection: A separate thread collects analog data from specified channels using the nidaqmx library.
- - Digital Data Collection: Another thread collects digital data from the specified channel using the nidaqmx library.
+ - Analog Data Collection: A separate thread collects analog data from specified channels using the `nidaqmx` library.
+ - Digital Data Collection: Another thread collects digital data from the specified channel using the `nidaqmx` library.
