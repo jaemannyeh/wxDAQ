@@ -1,5 +1,5 @@
 # wxDAQ
-NI cDAQ Console using `wxPython`
+NI cDAQ Console using wxPython
 
 ![wxDAQ Screen](./wxDAQ.png)
 
