@@ -243,7 +243,7 @@ class DAQConsoleFrame(wx.Frame):
             serial_number = device.serial_num
             self.list_ctrl.InsertItem(index - 1, device_name)
             self.list_ctrl.SetItem(index - 1, 1, product_type)
-            # self.list_ctrl.SetItem(index - 1, 2, str(serial_number)) # Uncomment when needed
+            self.list_ctrl.SetItem(index - 1, 2, str(serial_number)) # Uncomment when needed
 
     def on_copy_button_click(self, event):
         selected_items = []
