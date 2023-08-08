@@ -1,9 +1,9 @@
 # wxDAQ.py - NI cDAQ Console using wxPython
 #
-# Initially, I made wxDAQ.py just for fun, However, I later improved it to handle
-# situations where users make mistakes or encounter hardware problems.
-# I'm amazed by the high productivity that Python offer,
-# even though it might not be the best choice for core programming tasks.
+# Initially, I created wxDAQ.py just to become familiar with NI cDAQ. I later improved it
+# to handle situations where users make mistakes or encounter hardware problems.
+# The productivity of Python is impressive, even though it might not be the best choice
+# for core programming tasks.
 #
 # Application Architecture
 # - GUI Part: The GUI layer is developed using the wxPython library, providing a user interface.
